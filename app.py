@@ -30,7 +30,7 @@ def create_payment_pix():
 
     data_payment_pix = pix_obj.create_payment()
 
-    new_payment.bank_payment_id = data_payment_pix["data_payment_pix"]
+    new_payment.bank_payment_id = data_payment_pix["bank_payment_id"]
     new_payment.qr_code = data_payment_pix["qr_code_path"]
 
     db.session.add(new_payment)
@@ -42,7 +42,7 @@ def create_payment_pix():
         })
 
 
-@app.route('/payments/pix/qr_code/<file_name>', methods=['POST'])
+@app.route('/payments/pix/qr_code/<file_name>', methods=['GET'])
 def get_image(file_name):
     return send_file(f"static/img/{file_name}.png", mimetype='image/png')
 
@@ -56,8 +56,8 @@ def pix_confirmation():
         return jsonify({"message": "Invalid payment data"}), 400
 
     payment = Payment.query.filter_by(
-        bank_payment_id=data.get("bank_payment_id").first()
-        )
+        bank_payment_id=data.get("bank_payment_id")
+    ).first()
 
     if not payment or payment.paid:
         return jsonify({"message": "Payment not found"}), 404
